@@ -24,5 +24,8 @@ files = list(my_bucket.objects.filter(Prefix=KEY))
 file = files[0]
 print(file.key)
 body=file.get()['Body'].read()
-print(body)
+# print(body)
+# bytes to string
+contents=body.decode("utf-8")
+print(contents)
 
