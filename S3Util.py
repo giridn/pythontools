@@ -10,38 +10,46 @@ import boto3 # boto3 is the name of the Python SDK for AWS
 
 
 def getS3Resource():
-    AWS_ACCESS_KEY_ID = os.environ['aws_access_key_id']
-    AWS_SECRET_ACCESS_KEY = os.environ['aws_secret_access_key']
+    aws_access_key_id = os.environ['aws_access_key_id']
+    aws_secret_access_key = os.environ['aws_secret_access_key']
     session = boto3.Session(
-        aws_access_key_id=AWS_ACCESS_KEY_ID,
-        aws_secret_access_key=AWS_SECRET_ACCESS_KEY,
+        aws_access_key_id=aws_access_key_id,
+        aws_secret_access_key=aws_secret_access_key,
     )
     s3_resource = session.resource('s3')
     return s3_resource
 
 
 # Download file from s3 : https://realpython.com/python-boto3-aws-s3/#downloading-a-file
-def downloadFilefromS3(BUCKET_NAME, KEY):
+def downloadFilefromS3(bucket_name, key):
     s3_resource = getS3Resource()
     file_local_name = f'/tmp/{KEY}'
-    fileObj_s3 = s3_resource.Object(BUCKET_NAME, KEY)
+    fileObj_s3 = s3_resource.Object(bucket_name, key)
     fileObj_s3.download_file(file_local_name)
+    print(f'Downloaded {key} from bucket {bucket_name} to {file_local_name}')
     return file_local_name
 
+# Upload file to S3 : https://realpython.com/python-boto3-aws-s3/#uploading-a-file
+def uploadFiletoS3(bucket_name, key, filename):
+    s3_resource = getS3Resource()
+    my_bucket = s3_resource.Bucket(bucket_name)
+    my_bucket.upload_file(Filename=filename, Key=key)
+    print(f'Uploaded {filename} to bucket {bucket_name} as {key}')
+    return
 
 # Read from S3
-def readfromS3(BUCKET_NAME, KEY):
+def readfromS3(bucket_name, key):
     s3_resource = getS3Resource()
-    my_bucket = s3_resource.Bucket(BUCKET_NAME)  # subsitute this for your s3 bucket name.
+    print(f'Reading {key} from bucket {bucket_name}')
+    my_bucket = s3_resource.Bucket(bucket_name)  # subsitute this for your s3 bucket name.
 
-    files = list(my_bucket.objects.filter(Prefix=KEY))
+    files = list(my_bucket.objects.filter(Prefix=key))
     file_obj = files[0]
     # print(file_obj.key)
     body = file_obj.get()['Body'].read()
     # print(body)
 
-    # bytes to string
-    contents = body.decode("utf-8")
+    # bytes to string    contents = body.decode("utf-8")
     # print(contents)  # as string
 
     # Iterate over each line
@@ -52,14 +60,6 @@ def readfromS3(BUCKET_NAME, KEY):
     # print(lines[len(lines) - 1])
 
     return lines
-
-
-# Write to S3 : https://realpython.com/python-boto3-aws-s3/#uploading-a-file
-def writetoS3(bucket_name, key, filename):
-    s3_resource = getS3Resource()
-    my_bucket = s3_resource.Bucket(bucket_name)
-    my_bucket.upload_file(Filename=filename, Key=key)
-    return
 
 
 BUCKET_NAME = 'datasample1'
@@ -84,7 +84,7 @@ with open(file_local_name, 'w') as file_local:
     lines = file_local.write('\n'.join(lines))
 
 # file_local_name = f'/tmp/{KEY}'
-writetoS3(BUCKET_NAME, KEY, file_local_name)
+uploadFiletoS3(BUCKET_NAME, KEY, file_local_name)
 
 
 
