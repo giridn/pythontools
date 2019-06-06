@@ -49,7 +49,8 @@ def readfromS3(bucket_name, key):
     body = file_obj.get()['Body'].read()
     # print(body)
 
-    # bytes to string    contents = body.decode("utf-8")
+    # bytes to string
+    contents = body.decode("utf-8")
     # print(contents)  # as string
 
     # Iterate over each line
